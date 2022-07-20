@@ -375,7 +375,7 @@ int main(void)
 	draw_point(&vars, vars.p.r.x_ray_l, vars.p.r.y_ray_l);
 	draw_point(&vars, vars.p.r.x_ray_r, vars.p.r.y_ray_r);
 	mlx_hook(vars.win, 2, (1L << 0), key_hook, &vars);
-	mlx_loop_hook(vars.mlx, handle_no_event, &vars);
+	// mlx_loop_hook(vars.mlx, handle_no_event, &vars);
 	mlx_loop(vars.mlx);
 	return (0);
 }

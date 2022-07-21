@@ -4,7 +4,7 @@ SRCS = trial.c
 
 OBJS = ${SRCS:.c=.o}
 
-CC = gcc
+CC = gcc -ggdb
 
 ${NAME}: ${OBJS}
 		${MAKE} all -C ./minilibx/

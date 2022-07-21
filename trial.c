@@ -32,6 +32,8 @@ typedef struct s_player
 	float dy;
 	int	wall_frwrd;
 	int	wall_bckwrd;
+	int	wall_right;
+	int	wall_left;
 	t_rays r;
 } t_player;
 
@@ -47,6 +49,52 @@ typedef struct s_vars
 	t_player p;
 } t_vars;
 
+void	free_all(char **map)
+{
+	int	i;
+
+	i = 0;
+	while (map[i] != NULL)
+	{
+		free(map[i]);
+		i++;
+	}
+}
+
+void	init_window(t_vars *vars)
+{
+	int	i;
+	int	x;
+	int	y;
+	int	j;
+	void	*img;
+	int	width;
+	int	height;
+
+	i = 0;
+	j = 0;
+	x = 0;
+	y = 0;
+	img = mlx_xpm_file_to_image(vars->mlx, "xpm_files/red.xpm", &width, &height);
+	while (vars->map[i] != NULL)
+	{
+		j = 0;
+		x = 0;
+		while (vars->map[i][j])
+		{
+			if (vars->map[i][j] == '1')
+			{
+				mlx_put_image_to_window(vars->mlx, vars->win, img, x, y);
+			}
+			x += 88;
+			j++;
+		}
+		y += 88;
+		i++;
+	}
+	mlx_destroy_image(vars->mlx, img);
+}
+
 void draw_point(t_vars *vars, float x, float y)
 {
 	int i;
@@ -54,16 +102,17 @@ void draw_point(t_vars *vars, float x, float y)
 
 	i = 0;
 	j = 0;
-	while (i < 2)
-	{
-		j = 0;
-		while (j < 2)
-		{
+	// while (i < 5)
+	// {
+	// 	j = 0;
+	// 	while (j < 5)
+	// 	{
+		if ((x >= 0 && x <= vars->width) && (y >= 0 && y <= vars->height))
 			mlx_pixel_put(vars->mlx, vars->win, x + i, y + j, 0X00FF00);
-			j++;
-		}
-		i++;
-	}
+	// 		j++;
+	// 	}
+	// 	i++;
+	// }
 }
 
 void draw_line(t_vars *vars)
@@ -176,6 +225,129 @@ void Wall_C_forwrd(t_vars *vars)
 	}
 }
 
+void Wall_C_bckwrd(t_vars *vars)
+{
+	float	angle;
+	float	x;
+	float	y;
+	int		count = 7;
+	int		row;
+	int		col;
+	
+	
+	angle = vars->p.ang - (30 * PI / 180) - PI;
+	if (angle < 0)
+		angle += 2 * PI;
+	x = 0;
+	row = 0;
+	col = 0;
+	y = 0;
+	vars->p.wall_bckwrd = 0;
+	while (count > 0)
+	{
+		printf("Angle: %f\n", angle * 180 / PI);
+		x = vars->p.x + (cos(angle) * 12);
+		y = vars->p.y + (sin(angle) * 12);
+		row = (int)(x * 8 / vars->width);
+		col = (int)(y * 8 / vars->height);
+		if (vars->map[col][row] == '1')
+			vars->p.wall_bckwrd = 1;
+		draw_point(vars, x, y);
+		angle += (10 * PI / 180);
+		if (angle > 2 * PI)
+			angle -= 2 * PI;
+		count--;
+	}
+}
+
+void Wall_C_left(t_vars *vars)
+{
+	float	angle;
+	float	x;
+	float	y;
+	int		count = 7;
+	int		row;
+	int		col;
+	
+	
+	angle = vars->p.ang - (30 * PI / 180);
+	if (angle < 0)
+		angle += 2 * PI;
+	angle += (3 * PI / 2);
+	if (angle > 2 * PI)
+		angle -= 2 * PI;
+	x = 0;
+	row = 0;
+	col = 0;
+	y = 0;
+	// glColor3f(1, 0, 1);
+	// glPointSize(2);
+	vars->p.wall_left = 0;
+	// printf("Angle: %f\n", angle * 180 / PI);
+	while (count > 0)
+	{
+		printf("Angle: %f\n", angle * 180 / PI);
+		x = vars->p.x + (cos(angle) * 12);
+		y = vars->p.y + (sin(angle) * 12);
+		row = (int)(x * 8 / vars->width);
+		col = (int)(y * 8 / vars->height);
+		if (vars->map[col][row] == '1')
+			vars->p.wall_left = 1;
+		// glBegin(GL_POINTS);
+		// glVertex2f(x, y);
+		// glEnd();
+		draw_point(vars, x, y);
+		angle += (10 * PI / 180);
+		if (angle > 2 * PI)
+			angle -= 2 * PI;
+		count--;
+	}
+}
+
+void Wall_C_right(t_vars *vars)
+{
+	float	angle;
+	float	x;
+	float	y;
+	int		count = 7;
+	int		row;
+	int		col;
+	
+	
+	angle = vars->p.ang - (30 * PI / 180);
+	if (angle < 0)
+		angle += 2 * PI;
+	angle += (1 * PI / 2);
+	if (angle > 2 * PI)
+		angle -= 2 * PI;
+	x = 0;
+	row = 0;
+	col = 0;
+	y = 0;
+	// glColor3f(1, 0, 1);
+	// glPointSize(2);
+	vars->p.wall_right = 0;
+	// printf("Angle: %f\n", angle * 180 / PI);
+	while (count > 0)
+	{
+		// printf("Angle: %f\n", angle * 180 / PI);
+		x = vars->p.x + (cos(angle) * 12);
+		y = vars->p.y + (sin(angle) * 12);
+		row = (int)(x * 8 / vars->width);
+		col = (int)(y * 8 / vars->height);
+		if (vars->map[col][row] == '1')
+			vars->p.wall_right = 1;
+		// glBegin(GL_POINTS);
+		// glVertex2f(x, y);
+		// glEnd();
+		draw_point(vars, x, y);
+		angle += (10 * PI / 180);
+		if (angle > 2 * PI)
+			angle -= 2 * PI;
+		count--;
+	}
+}
+
 void raycasting_up(t_vars *vars)
 {
 	int	row;
@@ -200,7 +372,8 @@ void raycasting_down(t_vars *vars)
 	int	col;
 	vars->p.dx = cos(vars->p.ang) * 5;
 	vars->p.dy = sin(vars->p.ang) * 5;
-	if ((vars->p.x - vars->p.dx > 0) && (vars->p.x - vars->p.dx < vars->width) && (vars->p.y - vars->p.dy > 0) && (vars->p.y - vars->p.dy < vars->height))
+	if ((vars->p.x - vars->p.dx > 0) && (vars->p.x - vars->p.dx < vars->width)
+	&& (vars->p.y - vars->p.dy > 0) && (vars->p.y - vars->p.dy < vars->height))
 	{
 		row = (int)((vars->p.x - vars->p.dx) * 8 / vars->width);
 		col = (int)((vars->p.y - vars->p.dy) * 8 / vars->height);
@@ -214,33 +387,40 @@ void raycasting_down(t_vars *vars)
 
 void raycasting_right(t_vars *vars)
 {
+	int	row;
+	int	col;
+
 	vars->p.dx = cos((PI / 2) + (vars->p.ang)) * 5;
 	vars->p.dy = sin((PI / 2) + (vars->p.ang)) * 5;
-	if ((vars->p.x + vars->p.dx > 0) && (vars->p.x + vars->p.dx < vars->width) && (vars->p.y + vars->p.dy > 0) && (vars->p.y + vars->p.dy < vars->height))
+	if ((vars->p.x + vars->p.dx > 0) && (vars->p.x + vars->p.dx < vars->width)
+	&& (vars->p.y + vars->p.dy > 0) && (vars->p.y + vars->p.dy < vars->height))
 	{
-		// row = (int)((vars.p.x + vars.p.dx) * 8 / vars->width);
-		// col = (int)((vars.p.y + vars.p.dy) * 8 / vars->height);
-		// if (vars.maps[col][row] == '1' || vars.p.stop_right)
-		// 	return ;
+		row = (int)((vars->p.x + vars->p.dx) * 8 / vars->width);
+		col = (int)((vars->p.y + vars->p.dy) * 8 / vars->height);
+		if (vars->map[col][row] == '1' || vars->p.wall_right)
+			return ;
 		vars->p.x += vars->p.dx;
 		vars->p.y += vars->p.dy;
-		// vars.maps[col][row] = '0';
+		vars->map[col][row] = '0';
 	}
 }
 
 void raycasting_left(t_vars *vars)
 {
+	int	row;
+	int	col;
 	vars->p.dx = cos((PI / 2) + (vars->p.ang)) * 5;
 	vars->p.dy = sin((PI / 2) + (vars->p.ang)) * 5;
-	if ((vars->p.x - vars->p.dx > 0) && (vars->p.x - vars->p.dx < vars->width) && (vars->p.y - vars->p.dy > 0) && (vars->p.y - vars->p.dy < vars->height))
+	if ((vars->p.x - vars->p.dx > 0) && (vars->p.x - vars->p.dx < vars->width)
+	&& (vars->p.y - vars->p.dy > 0) && (vars->p.y - vars->p.dy < vars->height))
 	{
-		// row = (int)((vars.p.x + vars.p.dx) * 8 / vars->width);
-		// col = (int)((vars.p.y + vars.p.dy) * 8 / vars->height);
-		// if (vars.maps[col][row] == '1' || vars.p.stop_right)
-		// 	return ;
+		row = (int)((vars->p.x - vars->p.dx) * 8 / vars->width);
+		col = (int)((vars->p.y - vars->p.dy) * 8 / vars->height);
+		if (vars->map[col][row] == '1' || vars->p.wall_left)
+			return ;
 		vars->p.x -= vars->p.dx;
 		vars->p.y -= vars->p.dy;
-		// vars.maps[col][row] = '0';
+		vars->map[col][row] = '0';
 	}
 }
 
@@ -268,6 +448,22 @@ void rotation(int keycode, t_vars *vars)
 		vars->p.ang += 2 * PI;
 }
 
+void	exit_game(t_vars *vars)
+{
+	free_all(vars->map);
+	// mlx_destroy_image(vars.img);
+	mlx_destroy_window(vars->mlx, vars->win);
+}
+
+int handle_no_event(t_vars *vars)
+{
+	draw_rays(vars);
+	Wall_C_forwrd(vars);
+	Wall_C_bckwrd(vars);
+	Wall_C_left(vars);
+	Wall_C_right(vars);
+}
+
 int key_hook(int keycode, t_vars *vars)
 {
 	// printf("Keycode: %d\n", keycode);
@@ -275,8 +471,11 @@ int key_hook(int keycode, t_vars *vars)
 
 	img = mlx_new_image(vars->mlx, vars->width, vars->height);
 	mlx_put_image_to_window(vars->mlx, vars->win, img, 0, 0);
+	mlx_destroy_image(vars->mlx, img);
 	if (keycode == ESC)
-		exit(1);
+	{
+		exit_game(vars);
+	}
 	else if (keycode == E)
 		printf("E: Successful\n");
 	move_player(keycode, vars);
@@ -285,7 +484,8 @@ int key_hook(int keycode, t_vars *vars)
 	draw_rays(vars);
 	draw_point(vars, vars->p.r.x_ray_l, vars->p.r.y_ray_l);
 	draw_point(vars, vars->p.r.x_ray_r, vars->p.r.y_ray_r);
-	draw_line(vars);
+	init_window(vars);
+	handle_no_event(vars);
 	return (0);
 }
 
@@ -304,13 +504,9 @@ void init(t_vars *vars)
 	vars->p.dy = 0;
 	vars->p.wall_frwrd = 0;
 	vars->p.wall_bckwrd = 0;
+	vars->p.wall_left = 0;
+	vars->p.wall_right = 0;
 	draw_rays(vars);
-}
-
-int handle_no_event(t_vars *vars)
-{
-	draw_rays(vars);
-	Wall_C_forwrd(vars);
 }
 
 char **get_map2d(t_vars *vars)
@@ -322,8 +518,8 @@ char **get_map2d(t_vars *vars)
 	map = malloc(sizeof(char *) * (vars->cols + 1));
 	map[0] = strdup("11111111");
 	map[1] = strdup("10000001");
-	map[2] = strdup("10000001");
-	map[3] = strdup("10000001");
+	map[2] = strdup("10001001");
+	map[3] = strdup("10010001");
 	map[4] = strdup("10000001");
 	map[5] = strdup("100000P1");
 	map[6] = strdup("10000001");
@@ -359,6 +555,18 @@ void	parse_map(t_vars *vars)
 	}
 }
 
+int	mouse_hook(int x, int y, t_vars *vars)
+{
+	mlx_mouse_get_pos(vars->mlx, vars->win, &x, &y);
+	if (x < 350)
+		key_hook(A_L, vars);
+	else if (x > 350)
+		key_hook(A_R, vars);
+	// printf("Mouse Coordinates: %d, %d\n", x, y);
+	mlx_mouse_move(vars->mlx, vars->win, 350, 350);
+	return (0);
+}
+
 int main(void)
 {
 	t_vars vars;
@@ -371,11 +579,13 @@ int main(void)
 	parse_map(&vars);
 	draw_rays(&vars);
 	vars.win = mlx_new_window(vars.mlx, vars.width, vars.height, "Cub3D");
+	init_window(&vars);
 	draw_point(&vars, vars.p.x, vars.p.y);
 	draw_point(&vars, vars.p.r.x_ray_l, vars.p.r.y_ray_l);
 	draw_point(&vars, vars.p.r.x_ray_r, vars.p.r.y_ray_r);
 	mlx_hook(vars.win, 2, (1L << 0), key_hook, &vars);
-	// mlx_loop_hook(vars.mlx, handle_no_event, &vars);
+	mlx_hook(vars.win, 6, (1L<<6), mouse_hook, &vars);
+	mlx_loop_hook(vars.mlx, handle_no_event, &vars);
 	mlx_loop(vars.mlx);
 	return (0);
 }

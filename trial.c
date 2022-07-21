@@ -65,6 +65,18 @@ void	free_all(char **map)
 	}
 }
 
+void	ft_putstr_map(char **map)
+{
+	int	i;
+
+	i = 0;
+	while (map[i] != NULL)
+	{
+		printf("%s\n", map[i]);
+		i++;
+	}
+}
+
 void	init_window(t_vars *vars)
 {
 	int	i;
@@ -224,7 +236,7 @@ void Wall_C_forwrd(t_vars *vars)
 	// printf("Angle: %f\n", angle * 180 / PI);
 	while (count > 0)
 	{
-		printf("Angle: %f\n", angle * 180 / PI);
+		// printf("Angle: %f\n", angle * 180 / PI);
 		x = vars->p.x + (cos(angle) * 12);
 		y = vars->p.y + (sin(angle) * 12);
 		row = (int)(x * 8 / vars->width);
@@ -259,7 +271,7 @@ void Wall_C_bckwrd(t_vars *vars)
 	vars->p.wall_bckwrd = 0;
 	while (count > 0)
 	{
-		printf("Angle: %f\n", angle * 180 / PI);
+		// printf("Angle: %f\n", angle * 180 / PI);
 		x = vars->p.x + (cos(angle) * 12);
 		y = vars->p.y + (sin(angle) * 12);
 		row = (int)(x * 8 / vars->width);
@@ -300,7 +312,7 @@ void Wall_C_left(t_vars *vars)
 	// printf("Angle: %f\n", angle * 180 / PI);
 	while (count > 0)
 	{
-		printf("Angle: %f\n", angle * 180 / PI);
+		// printf("Angle: %f\n", angle * 180 / PI);
 		x = vars->p.x + (cos(angle) * 12);
 		y = vars->p.y + (sin(angle) * 12);
 		row = (int)(x * 8 / vars->width);
@@ -374,9 +386,14 @@ void raycasting_up(t_vars *vars)
 		col = (int)((vars->p.y + vars->p.dy) * 8 / vars->height);
 		if (vars->map[col][row] == '1' || vars->p.wall_frwrd)
 			return ;
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = '0';
 		vars->p.x += vars->p.dx;
 		vars->p.y += vars->p.dy;
-		vars->map[col][row] = '0';
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = 'P';
 	}
 }
 
@@ -393,9 +410,14 @@ void raycasting_down(t_vars *vars)
 		col = (int)((vars->p.y - vars->p.dy) * 8 / vars->height);
 		if (vars->map[col][row] == '1' || vars->p.wall_bckwrd)
 			return ;
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = '0';
 		vars->p.x -= vars->p.dx;
 		vars->p.y -= vars->p.dy;
-		vars->map[col][row] = '0';
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = 'P';
 	}
 }
 
@@ -413,9 +435,14 @@ void raycasting_right(t_vars *vars)
 		col = (int)((vars->p.y + vars->p.dy) * 8 / vars->height);
 		if (vars->map[col][row] == '1' || vars->p.wall_right)
 			return ;
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = '0';
 		vars->p.x += vars->p.dx;
 		vars->p.y += vars->p.dy;
-		vars->map[col][row] = '0';
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = 'P';
 	}
 }
 
@@ -432,9 +459,14 @@ void raycasting_left(t_vars *vars)
 		col = (int)((vars->p.y - vars->p.dy) * 8 / vars->height);
 		if (vars->map[col][row] == '1' || vars->p.wall_left)
 			return ;
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = '0';
 		vars->p.x -= vars->p.dx;
 		vars->p.y -= vars->p.dy;
-		vars->map[col][row] = '0';
+		row = (int)((vars->p.x) * 8 / vars->width);
+		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->map[col][row] = 'P';
 	}
 }
 
@@ -503,6 +535,7 @@ int key_hook(int keycode, t_vars *vars)
 	draw_point(vars, vars->p.r.x_ray_r, vars->p.r.y_ray_r);
 	init_window(vars);
 	handle_no_event(vars);
+	ft_putstr_map(vars->map);
 	return (0);
 }
 

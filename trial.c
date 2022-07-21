@@ -46,6 +46,10 @@ typedef struct s_vars
 	int rows;
 	int cols;
 	char **map;
+	int	bpp;
+	int	len;
+	int	end;
+	void	*addr;
 	t_player p;
 } t_vars;
 
@@ -95,6 +99,15 @@ void	init_window(t_vars *vars)
 	mlx_destroy_image(vars->mlx, img);
 }
 
+// void	my_pixel_put(t_vars *vars, int x, int y, int rgb)
+// {
+// 	char	*draw;
+
+// 	draw = vars->addr
+// 		+ (y * vars->len + x * (vars->bpp / 8));
+// 	*(unsigned int *)draw = rgb;
+// }
+
 void draw_point(t_vars *vars, float x, float y)
 {
 	int i;
@@ -108,7 +121,8 @@ void draw_point(t_vars *vars, float x, float y)
 	// 	while (j < 5)
 	// 	{
 		if ((x >= 0 && x <= vars->width) && (y >= 0 && y <= vars->height))
-			mlx_pixel_put(vars->mlx, vars->win, x + i, y + j, 0X00FF00);
+			mlx_pixel_put(vars->mlx, vars->win, x, y, 0x00FF00);
+			// my_pixel_put(vars, x, y, 0X00FF00);
 	// 		j++;
 	// 	}
 	// 	i++;
@@ -453,6 +467,7 @@ void	exit_game(t_vars *vars)
 	free_all(vars->map);
 	// mlx_destroy_image(vars.img);
 	mlx_destroy_window(vars->mlx, vars->win);
+	exit(0);
 }
 
 int handle_no_event(t_vars *vars)
@@ -470,6 +485,8 @@ int key_hook(int keycode, t_vars *vars)
 	void *img;
 
 	img = mlx_new_image(vars->mlx, vars->width, vars->height);
+	// vars->addr = mlx_get_data_addr(img, &vars->bpp, &vars->len, &vars->end);
+	// printf("%s\n", (unsigned char *)vars->addr);
 	mlx_put_image_to_window(vars->mlx, vars->win, img, 0, 0);
 	mlx_destroy_image(vars->mlx, img);
 	if (keycode == ESC)
@@ -506,6 +523,9 @@ void init(t_vars *vars)
 	vars->p.wall_bckwrd = 0;
 	vars->p.wall_left = 0;
 	vars->p.wall_right = 0;
+	// vars->bpp = 0;
+	// vars->len = 0;
+	// vars->end = 0;
 	draw_rays(vars);
 }
 

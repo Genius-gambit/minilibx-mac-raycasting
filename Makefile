@@ -1,6 +1,6 @@
 NAME = exec
 
-SRCS = trial.c
+SRCS = parse_map.c
 
 OBJS = ${SRCS:.c=.o}
 

@@ -25,8 +25,10 @@ typedef struct s_rays
 
 typedef struct s_player
 {
-	float x;
-	float y;
+	float x_map_co;
+	float y_map_co;
+	float	x_co;
+	float	y_co;
 	float ang;
 	float dx;
 	float dy;
@@ -141,29 +143,29 @@ void draw_point(t_vars *vars, float x, float y)
 	// }
 }
 
-void draw_line(t_vars *vars)
-{
-	float slope;
-	float incpt;
-	float x;
-	float y;
+// void draw_line(t_vars *vars)
+// {
+// 	float slope;
+// 	float incpt;
+// 	float x;
+// 	float y;
 
-	// vars->img = mlx_new_image(vars->mlx, vars->width, vars->height);
-	// vars->addr = mlx_get_data_addr(vars->img, &vars->bitspix, &vars->len, &vars->end);
-	slope = ((vars->p.y - vars->p.r.y_ray_l) / (vars->p.x - vars->p.r.x_ray_l));
-	incpt = vars->p.y - (slope * vars->p.x);
-	printf("%f\n", slope);
-	if ((vars->p.ang >= (3 * PI / 2)) && (vars->p.ang < (2 * PI)))
-	{
-		y = vars->p.y - 1;
-		x = (y - incpt) / slope;
-		while (y >= 0 && y > vars->p.r.y_ray_l && x < vars->width && vars->p.r.y_ray_l < vars->height)
-		{
-			draw_point(vars, x, y);
-			y--;
-			x = (y - incpt) / slope;
-		}
-	}
+// 	// vars->img = mlx_new_image(vars->mlx, vars->width, vars->height);
+// 	// vars->addr = mlx_get_data_addr(vars->img, &vars->bitspix, &vars->len, &vars->end);
+// 	slope = ((vars->p.y - vars->p.r.y_ray_l) / (vars->p.x - vars->p.r.x_ray_l));
+// 	incpt = vars->p.y - (slope * vars->p.x);
+// 	printf("%f\n", slope);
+// 	if ((vars->p.ang >= (3 * PI / 2)) && (vars->p.ang < (2 * PI)))
+// 	{
+// 		y = vars->p.y - 1;
+// 		x = (y - incpt) / slope;
+// 		while (y >= 0 && y > vars->p.r.y_ray_l && x < vars->width && vars->p.r.y_ray_l < vars->height)
+// 		{
+// 			draw_point(vars, x, y);
+// 			y--;
+// 			x = (y - incpt) / slope;
+// 		}
+// 	}
 	// else if ((vars->p.ang >= 0) && (vars->p.ang < (PI / 2)))
 	// {
 	// 	x = vars->p.x + 1;
@@ -199,7 +201,7 @@ void draw_line(t_vars *vars)
 	// }
 	// mlx_put_image_to_window(vars->mlx, vars->win, vars->img, 0, 0);
 	// init_window(vars);
-}
+// }
 
 void draw_rays(t_vars *vars)
 {
@@ -209,10 +211,12 @@ void draw_rays(t_vars *vars)
 	vars->p.r.ang_ray_r = vars->p.ang + (PI / 6);
 	if (vars->p.r.ang_ray_r > 2 * PI)
 		vars->p.r.ang_ray_r -= 2 * PI;
-	vars->p.r.x_ray_l = vars->p.x + cos(vars->p.r.ang_ray_l) * 15;
-	vars->p.r.y_ray_l = vars->p.y + sin(vars->p.r.ang_ray_l) * 15;
-	vars->p.r.x_ray_r = vars->p.x + cos(vars->p.r.ang_ray_r) * 15;
-	vars->p.r.y_ray_r = vars->p.y + sin(vars->p.r.ang_ray_r) * 15;
+	vars->p.r.x_ray_l = (vars->p.x_co + cos(vars->p.r.ang_ray_l) * 0.5) * 87.5;
+	vars->p.r.y_ray_l = (vars->p.y_co + sin(vars->p.r.ang_ray_l) * 0.5) * 87.5;
+	vars->p.r.x_ray_r = (vars->p.x_co + cos(vars->p.r.ang_ray_r) * 0.5) * 87.5;
+	vars->p.r.y_ray_r = (vars->p.y_co + sin(vars->p.r.ang_ray_r) * 0.5) * 87.5;
+	draw_point(vars, vars->p.r.x_ray_l, vars->p.r.y_ray_l);
+	draw_point(vars, vars->p.r.x_ray_r, vars->p.r.y_ray_r);
 }
 
 void Wall_C_forwrd(t_vars *vars)
@@ -226,6 +230,7 @@ void Wall_C_forwrd(t_vars *vars)
 	
 	
 	angle = vars->p.ang - (30 * PI / 180);
+	// printf("Angle: %f\n", angle);
 	if (angle < 0)
 		angle += 2 * PI;
 	x = 0;
@@ -237,13 +242,13 @@ void Wall_C_forwrd(t_vars *vars)
 	while (count > 0)
 	{
 		// printf("Angle: %f\n", angle * 180 / PI);
-		x = vars->p.x + (cos(angle) * 12);
-		y = vars->p.y + (sin(angle) * 12);
-		row = (int)(x * 8 / vars->width);
-		col = (int)(y * 8 / vars->height);
-		if (vars->map[col][row] == '1')
+		x = vars->p.x_co + (cos(angle) * 0.1);
+		y = vars->p.y_co + (sin(angle) * 0.1);
+		row = (int)x;
+		col = (int)y;
+		if (!vars->map[col][row] || (vars->map[col][row] && vars->map[col][row] == '1'))
 			vars->p.wall_frwrd = 1;
-		draw_point(vars, x, y);
+		draw_point(vars, x * 87.5, y * 87.5);
 		angle += (10 * PI / 180);
 		if (angle > 2 * PI)
 			angle -= 2 * PI;
@@ -272,13 +277,13 @@ void Wall_C_bckwrd(t_vars *vars)
 	while (count > 0)
 	{
 		// printf("Angle: %f\n", angle * 180 / PI);
-		x = vars->p.x + (cos(angle) * 12);
-		y = vars->p.y + (sin(angle) * 12);
-		row = (int)(x * 8 / vars->width);
-		col = (int)(y * 8 / vars->height);
-		if (vars->map[col][row] == '1')
+		x = vars->p.x_co + (cos(angle) * 0.1);
+		y = vars->p.y_co + (sin(angle) * 0.1);
+		row = (int)x;
+		col = (int)y;
+		if (!vars->map[col][row] || (vars->map[col][row] && vars->map[col][row] == '1'))
 			vars->p.wall_bckwrd = 1;
-		draw_point(vars, x, y);
+		draw_point(vars, x * 87.5, y * 87.5);
 		angle += (10 * PI / 180);
 		if (angle > 2 * PI)
 			angle -= 2 * PI;
@@ -313,16 +318,16 @@ void Wall_C_left(t_vars *vars)
 	while (count > 0)
 	{
 		// printf("Angle: %f\n", angle * 180 / PI);
-		x = vars->p.x + (cos(angle) * 12);
-		y = vars->p.y + (sin(angle) * 12);
-		row = (int)(x * 8 / vars->width);
-		col = (int)(y * 8 / vars->height);
-		if (vars->map[col][row] == '1')
+		x = vars->p.x_co + (cos(angle) * 0.1);
+		y = vars->p.y_co + (sin(angle) * 0.1);
+		row = (int)x;
+		col = (int)y;
+		if (!vars->map[col][row] || (vars->map[col][row] && vars->map[col][row] == '1'))
 			vars->p.wall_left = 1;
 		// glBegin(GL_POINTS);
 		// glVertex2f(x, y);
 		// glEnd();
-		draw_point(vars, x, y);
+		draw_point(vars, x * 87.5, y * 87.5);
 		angle += (10 * PI / 180);
 		if (angle > 2 * PI)
 			angle -= 2 * PI;
@@ -343,7 +348,7 @@ void Wall_C_right(t_vars *vars)
 	angle = vars->p.ang - (30 * PI / 180);
 	if (angle < 0)
 		angle += 2 * PI;
-	angle += (1 * PI / 2);
+	angle += (PI / 2);
 	if (angle > 2 * PI)
 		angle -= 2 * PI;
 	x = 0;
@@ -357,16 +362,16 @@ void Wall_C_right(t_vars *vars)
 	while (count > 0)
 	{
 		// printf("Angle: %f\n", angle * 180 / PI);
-		x = vars->p.x + (cos(angle) * 12);
-		y = vars->p.y + (sin(angle) * 12);
-		row = (int)(x * 8 / vars->width);
-		col = (int)(y * 8 / vars->height);
-		if (vars->map[col][row] == '1')
+		x = vars->p.x_co + (cos(angle) * 0.1);
+		y = vars->p.y_co + (sin(angle) * 0.1);
+		row = (int)x;
+		col = (int)y;
+		if (!vars->map[col][row] || (vars->map[col][row] && vars->map[col][row] == '1'))
 			vars->p.wall_right = 1;
 		// glBegin(GL_POINTS);
 		// glVertex2f(x, y);
 		// glEnd();
-		draw_point(vars, x, y);
+		draw_point(vars, x * 87.5, y * 87.5);
 		angle += (10 * PI / 180);
 		if (angle > 2 * PI)
 			angle -= 2 * PI;
@@ -374,26 +379,43 @@ void Wall_C_right(t_vars *vars)
 	}
 }
 
+int	key_block(int c)
+{
+	if (c == 0)
+		return (1);
+	else if (c == '1')
+		return (1);
+	return(0);
+}
+
 void raycasting_up(t_vars *vars)
 {
 	int	row;
 	int	col;
-	vars->p.dx = cos(vars->p.ang) * 5;
-	vars->p.dy = sin(vars->p.ang) * 5;
-	if ((vars->p.x + vars->p.dx > 0) && (vars->p.x + vars->p.dx < vars->width) && (vars->p.y + vars->p.dy > 0) && (vars->p.y + vars->p.dy < vars->height))
+
+	vars->p.dx = cos(vars->p.ang) * (0.0556);
+	vars->p.dy = sin(vars->p.ang) * (0.0556);
+	if ((((vars->p.x_co + vars->p.dx) * 87.5) > 0)
+		&& (((vars->p.x_co + vars->p.dx) * 87.5) < vars->width)
+		&& (((vars->p.y_co + vars->p.dy) * 87.5) > 0)
+		&& (((vars->p.y_co + vars->p.dy) * 87.5) < vars->height))
 	{
-		row = (int)((vars->p.x + vars->p.dx) * 8 / vars->width);
-		col = (int)((vars->p.y + vars->p.dy) * 8 / vars->height);
-		if (vars->map[col][row] == '1' || vars->p.wall_frwrd)
+		printf("Change in x: %f, Change in y: %f\n", vars->p.dx, vars->p.dy);
+		row = (int)(vars->p.x_co + vars->p.dx);
+		col = (int)(vars->p.y_co + vars->p.dy);
+		// if ((vars->map[col][row] && vars->map[col][row] == '1') || vars->p.wall_frwrd)
+		if ((vars->map[col][row] && key_block(vars->map[col][row])) || vars->p.wall_frwrd)
 			return ;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		row = (int)(vars->p.x_co);
+		col = (int)(vars->p.y_co);
 		vars->map[col][row] = '0';
-		vars->p.x += vars->p.dx;
-		vars->p.y += vars->p.dy;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->p.x_co += vars->p.dx;
+		vars->p.y_co += vars->p.dy;
+		row = (int)(vars->p.x_co + vars->p.dx);
+		col = (int)(vars->p.y_co + vars->p.dy);
 		vars->map[col][row] = 'P';
+		vars->p.x_map_co = vars->p.x_co * 87.5;
+		vars->p.y_map_co = vars->p.y_co * 87.5;
 	}
 }
 
@@ -401,23 +423,29 @@ void raycasting_down(t_vars *vars)
 {
 	int	row;
 	int	col;
-	vars->p.dx = cos(vars->p.ang) * 5;
-	vars->p.dy = sin(vars->p.ang) * 5;
-	if ((vars->p.x - vars->p.dx > 0) && (vars->p.x - vars->p.dx < vars->width)
-	&& (vars->p.y - vars->p.dy > 0) && (vars->p.y - vars->p.dy < vars->height))
+
+	vars->p.dx = cos(vars->p.ang) * (0.0556);
+	vars->p.dy = sin(vars->p.ang) * (0.0556);
+	if ((((vars->p.x_co - vars->p.dx) * 87.5) > 0)
+		&& (((vars->p.x_co - vars->p.dx) * 87.5) < vars->width)
+		&& (((vars->p.y_co - vars->p.dy) * 87.5) > 0)
+		&& (((vars->p.y_co - vars->p.dy) * 87.5) < vars->height))
 	{
-		row = (int)((vars->p.x - vars->p.dx) * 8 / vars->width);
-		col = (int)((vars->p.y - vars->p.dy) * 8 / vars->height);
-		if (vars->map[col][row] == '1' || vars->p.wall_bckwrd)
+		row = (int)(vars->p.x_co - vars->p.dx);
+		col = (int)(vars->p.y_co - vars->p.dy);
+		if (vars->map[col][row] && key_block(vars->map[col][row]) || vars->p.wall_bckwrd)
 			return ;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		// if ((vars->map[col][row] && vars->map[col][row] == '1') || vars->p.wall_bckwrd)
+		row = (int)(vars->p.x_co);
+		col = (int)(vars->p.y_co);
 		vars->map[col][row] = '0';
-		vars->p.x -= vars->p.dx;
-		vars->p.y -= vars->p.dy;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->p.x_co -= vars->p.dx;
+		vars->p.y_co -= vars->p.dy;
+		row = (int)(vars->p.x_co - vars->p.dx);
+		col = (int)(vars->p.y_co - vars->p.dy);
 		vars->map[col][row] = 'P';
+		vars->p.x_map_co = vars->p.x_co * 87.5;
+		vars->p.y_map_co = vars->p.y_co * 87.5;
 	}
 }
 
@@ -426,23 +454,27 @@ void raycasting_right(t_vars *vars)
 	int	row;
 	int	col;
 
-	vars->p.dx = cos((PI / 2) + (vars->p.ang)) * 5;
-	vars->p.dy = sin((PI / 2) + (vars->p.ang)) * 5;
-	if ((vars->p.x + vars->p.dx > 0) && (vars->p.x + vars->p.dx < vars->width)
-	&& (vars->p.y + vars->p.dy > 0) && (vars->p.y + vars->p.dy < vars->height))
+	vars->p.dx = cos((PI / 2) + (vars->p.ang)) * 0.0556;
+	vars->p.dy = sin((PI / 2) + (vars->p.ang)) * 0.0556;
+	if ((((vars->p.x_co - vars->p.dx) * 87.5) > 0)
+		&& (((vars->p.x_co - vars->p.dx) * 87.5) < vars->width)
+		&& (((vars->p.y_co - vars->p.dy) * 87.5) > 0)
+		&& (((vars->p.y_co - vars->p.dy) * 87.5) < vars->height))
 	{
-		row = (int)((vars->p.x + vars->p.dx) * 8 / vars->width);
-		col = (int)((vars->p.y + vars->p.dy) * 8 / vars->height);
-		if (vars->map[col][row] == '1' || vars->p.wall_right)
+		row = (int)(vars->p.x_co + vars->p.dx);
+		col = (int)(vars->p.y_co + vars->p.dy);
+		if (vars->map[col][row] && key_block(vars->map[col][row]) || vars->p.wall_right)
 			return ;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		row = (int)(vars->p.x_co);
+		col = (int)(vars->p.y_co);
 		vars->map[col][row] = '0';
-		vars->p.x += vars->p.dx;
-		vars->p.y += vars->p.dy;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->p.x_co += vars->p.dx;
+		vars->p.y_co += vars->p.dy;
+		row = (int)(vars->p.x_co + vars->p.dx);
+		col = (int)(vars->p.y_co + vars->p.dy);
 		vars->map[col][row] = 'P';
+		vars->p.x_map_co = vars->p.x_co * 87.5;
+		vars->p.y_map_co = vars->p.y_co * 87.5;
 	}
 }
 
@@ -450,23 +482,28 @@ void raycasting_left(t_vars *vars)
 {
 	int	row;
 	int	col;
-	vars->p.dx = cos((PI / 2) + (vars->p.ang)) * 5;
-	vars->p.dy = sin((PI / 2) + (vars->p.ang)) * 5;
-	if ((vars->p.x - vars->p.dx > 0) && (vars->p.x - vars->p.dx < vars->width)
-	&& (vars->p.y - vars->p.dy > 0) && (vars->p.y - vars->p.dy < vars->height))
+
+	vars->p.dx = cos((PI / 2) + (vars->p.ang)) * 0.0556;
+	vars->p.dy = sin((PI / 2) + (vars->p.ang)) * 0.0556;
+	if ((((vars->p.x_co - vars->p.dx) * 87.5) > 0)
+		&& (((vars->p.x_co - vars->p.dx) * 87.5) < vars->width)
+		&& (((vars->p.y_co - vars->p.dy) * 87.5) > 0)
+		&& (((vars->p.y_co - vars->p.dy) * 87.5) < vars->height))
 	{
-		row = (int)((vars->p.x - vars->p.dx) * 8 / vars->width);
-		col = (int)((vars->p.y - vars->p.dy) * 8 / vars->height);
-		if (vars->map[col][row] == '1' || vars->p.wall_left)
+		row = (int)(vars->p.x_co - vars->p.dx);
+		col = (int)(vars->p.y_co - vars->p.dy);
+		if (vars->map[col][row] && key_block(vars->map[col][row]) || vars->p.wall_left)
 			return ;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		row = (int)(vars->p.x_co);
+		col = (int)(vars->p.y_co);
 		vars->map[col][row] = '0';
-		vars->p.x -= vars->p.dx;
-		vars->p.y -= vars->p.dy;
-		row = (int)((vars->p.x) * 8 / vars->width);
-		col = (int)((vars->p.y) * 8 / vars->height);
+		vars->p.x_co -= vars->p.dx;
+		vars->p.y_co -= vars->p.dy;
+		row = (int)(vars->p.x_co - vars->p.dx);
+		col = (int)(vars->p.y_co - vars->p.dy);
 		vars->map[col][row] = 'P';
+		vars->p.x_map_co = vars->p.x_co * 87.5;
+		vars->p.y_map_co = vars->p.y_co * 87.5;
 	}
 }
 
@@ -517,19 +554,17 @@ int key_hook(int keycode, t_vars *vars)
 	void *img;
 
 	img = mlx_new_image(vars->mlx, vars->width, vars->height);
-	// vars->addr = mlx_get_data_addr(img, &vars->bpp, &vars->len, &vars->end);
-	// printf("%s\n", (unsigned char *)vars->addr);
+	vars->addr = mlx_get_data_addr(img, &vars->bpp, &vars->len, &vars->end);
+	printf("%s\n", (unsigned char *)vars->addr);
 	mlx_put_image_to_window(vars->mlx, vars->win, img, 0, 0);
 	mlx_destroy_image(vars->mlx, img);
 	if (keycode == ESC)
-	{
 		exit_game(vars);
-	}
 	else if (keycode == E)
 		printf("E: Successful\n");
 	move_player(keycode, vars);
 	rotation(keycode, vars);
-	draw_point(vars, vars->p.x, vars->p.y);
+	draw_point(vars, vars->p.x_map_co, vars->p.y_map_co);
 	draw_rays(vars);
 	draw_point(vars, vars->p.r.x_ray_l, vars->p.r.y_ray_l);
 	draw_point(vars, vars->p.r.x_ray_r, vars->p.r.y_ray_r);
@@ -541,8 +576,8 @@ int key_hook(int keycode, t_vars *vars)
 
 void init(t_vars *vars)
 {
-	vars->p.x = 320;
-	vars->p.y = 320;
+	vars->p.x_co = 320;
+	vars->p.y_co = 320;
 	vars->p.ang = 3 * (PI / 2);
 	vars->p.r.ang_ray_l = 0;
 	vars->p.r.ang_ray_r = 0;
@@ -559,7 +594,7 @@ void init(t_vars *vars)
 	// vars->bpp = 0;
 	// vars->len = 0;
 	// vars->end = 0;
-	draw_rays(vars);
+	// draw_rays(vars);
 }
 
 char **get_map2d(t_vars *vars)
@@ -570,12 +605,12 @@ char **get_map2d(t_vars *vars)
 	vars->cols = 8;
 	map = malloc(sizeof(char *) * (vars->cols + 1));
 	map[0] = strdup("11111111");
-	map[1] = strdup("10000001");
-	map[2] = strdup("10001001");
-	map[3] = strdup("10011P01");
-	map[4] = strdup("10000001");
-	map[5] = strdup("10000001");
-	map[6] = strdup("10000001");
+	map[1] = strdup("010000001");
+	map[2] = strdup("010000001");
+	map[3] = strdup("010001001");
+	map[4] = strdup("010010001");
+	map[5] = strdup("0100P0001");
+	map[6] = strdup("010000001");
 	map[7] = strdup("11111111");
 	map[8] = NULL;
 	return (map);
@@ -588,26 +623,25 @@ void	parse_map(t_vars *vars)
 
 	i = 0;
 	j = 0;
-	vars->p.x = 0;
-	vars->p.y = 0;
+	vars->p.x_co = 0;
+	vars->p.y_co = 0;
 	while (vars->map[i] != NULL)
 	{
 		j = 0;
-		vars->p.x = 0;
 		while (vars->map[i][j])
 		{
 			if (vars->map[i][j] == 'P')
 				break;
-			vars->p.x += 87.5;
 			j++;
 		}
 		if (vars->map[i][j] == 'P')
 			break;
-		vars->p.y += 87.5;
 		i++;
 	}
-	vars->p.x += 87.5 / 2;
-	vars->p.y += 87.5 / 2;
+	vars->p.x_co = j + 0.5;
+	vars->p.y_co = i + 0.5;
+	vars->p.x_map_co = vars->p.x_co * 87.5;
+	vars->p.y_map_co = vars->p.y_co * 87.5;
 }
 
 int	mouse_hook(int x, int y, t_vars *vars)
@@ -632,15 +666,15 @@ int main(void)
 	vars.height = 700;
 	vars.map = get_map2d(&vars);
 	parse_map(&vars);
-	draw_rays(&vars);
+	printf("Row: %f, Col: %f\n", vars.p.x_co, vars.p.y_co);
+	printf("Row: %f, Col: %f\n", vars.p.x_map_co, vars.p.y_map_co);
 	vars.win = mlx_new_window(vars.mlx, vars.width, vars.height, "Cub3D");
+	draw_rays(&vars);
+	draw_point(&vars, vars.p.x_map_co, vars.p.y_map_co);
 	init_window(&vars);
-	draw_point(&vars, vars.p.x, vars.p.y);
-	draw_point(&vars, vars.p.r.x_ray_l, vars.p.r.y_ray_l);
-	draw_point(&vars, vars.p.r.x_ray_r, vars.p.r.y_ray_r);
 	mlx_hook(vars.win, 2, (1L << 0), key_hook, &vars);
 	mlx_hook(vars.win, 6, (1L<<6), mouse_hook, &vars);
-	// mlx_loop_hook(vars.mlx, handle_no_event, &vars);
+	mlx_loop_hook(vars.mlx, handle_no_event, &vars);
 	mlx_loop(vars.mlx);
 	return (0);
 }

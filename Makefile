@@ -1,6 +1,6 @@
 NAME = exec
 
-SRCS = parse_map.c
+SRCS = raycasting.c
 
 OBJS = ${SRCS:.c=.o}
 

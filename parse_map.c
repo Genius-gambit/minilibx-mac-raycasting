@@ -385,6 +385,8 @@ int	key_block(int c)
 		return (1);
 	else if (c == '1')
 		return (1);
+	else if (c == ' ')
+		return(1);
 	return(0);
 }
 
@@ -431,10 +433,12 @@ void raycasting_down(t_vars *vars)
 		&& (((vars->p.y_co - vars->p.dy) * 87.5) > 0)
 		&& (((vars->p.y_co - vars->p.dy) * 87.5) < vars->height))
 	{
+		printf("Change in x: %f, Change in y: %f\n", vars->p.dx, vars->p.dy);
 		row = (int)(vars->p.x_co - vars->p.dx);
 		col = (int)(vars->p.y_co - vars->p.dy);
 		if (vars->map[col][row] && key_block(vars->map[col][row]) || vars->p.wall_bckwrd)
 			return ;
+		printf("Char: %c\n", vars->map[col][row]);
 		// if ((vars->map[col][row] && vars->map[col][row] == '1') || vars->p.wall_bckwrd)
 		row = (int)(vars->p.x_co);
 		col = (int)(vars->p.y_co);
@@ -605,12 +609,12 @@ char **get_map2d(t_vars *vars)
 	vars->cols = 8;
 	map = malloc(sizeof(char *) * (vars->cols + 1));
 	map[0] = strdup("11111111");
-	map[1] = strdup("010000001");
-	map[2] = strdup("010000001");
-	map[3] = strdup("010001001");
-	map[4] = strdup("010010001");
-	map[5] = strdup("0100P0001");
-	map[6] = strdup("010000001");
+	map[1] = strdup("10000001");
+	map[2] = strdup("10000001");
+	map[3] = strdup("11101001");
+	map[4] = strdup("10010001");
+	map[5] = strdup("100P0001");
+	map[6] = strdup("10000001");
 	map[7] = strdup("11111111");
 	map[8] = NULL;
 	return (map);

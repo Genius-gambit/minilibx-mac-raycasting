@@ -203,11 +203,29 @@ void draw_point(t_vars *vars, float x, float y)
 	// init_window(vars);
 // }
 
+int	check_wall(t_vars *vars, float x, float y)
+{
+	if (!vars->map[col][row] || (vars->map[col][row] && vars->map[col][row] == '1'))
+			vars->p.wall_left = 1;
+}
+
 void draw_rays(t_vars *vars)
 {
-	vars->p.r.ang_ray_l = vars->p.ang - (PI / 6);
-	if (vars->p.r.ang_ray_l < 0)
-		vars->p.r.ang_ray_l += 2 * PI;
+	float	angle;
+	float	x;
+	float	y;
+	int		wall;
+
+	angle = vars->p.ang - (PI / 6);
+	if (angle < 0)
+		angle += 2 * PI;
+	wall = 0;
+	while (!wall)
+	{
+		x = (vars->p.x_co + (cos(angle) * 0.5));
+		y = (vars->p.y_co + sin(angle) * 0.5);
+		wall = check_wall(x, y);
+	}
 	vars->p.r.ang_ray_r = vars->p.ang + (PI / 6);
 	if (vars->p.r.ang_ray_r > 2 * PI)
 		vars->p.r.ang_ray_r -= 2 * PI;

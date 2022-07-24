@@ -82,10 +82,10 @@ void	draw_point(t_vars *vars, float x, float y)
 	int	j;
 
 	i = 5;
-	j = 5;
+	j = 3;
 	while (j > 0)
 	{
-		i = 5;
+		i = 3;
 		while (i > 0)
 		{
 			mlx_pixel_put(vars->mlx, vars->win, x + i, y + j, 0x00FF00);
@@ -262,31 +262,88 @@ int	handle_wall_collision(t_vars *vars)
 	return (0);
 }
 
+int	check_wall(t_vars *vars, float x, float y)
+{
+	int	col;
+	int	row;
+
+	if ((y >= 0) && x < strlen(vars->map[(int)(y)]))
+	{
+		row = x;
+		col = y;
+		if (vars->map[col][row] == '1')
+			return (1);
+		return (0);
+	}
+	return (1);
+}
+
+float	sq(float num)
+{
+	return (num * num);
+}
+
+float	get_dist(float x_one, float y_one, float x_two, float y_two)
+{
+	float	dist;
+
+	dist = sqrt(sq(x_two - x_one) + sq(y_two - y_one));
+}
+
+void	print_points(float x, float y)
+{
+	printf("X: %f, Y: %f\n", x, y);
+}
+
 void	print_rays(t_vars *vars)
 {
 	float	angle;
+	float	x;
+	float	y;
+	int		wall;
+	int		count;
 
 	angle = vars->p.ang - (PI / 6);
 	if (angle < 0)
 		angle += 2 * PI;
-	vars->p.rays.r_ang_left = angle;
-	angle = vars->p.ang + (PI / 6);
-	if (angle > 2 * PI)
-		angle -= 2 * PI;
-	vars->p.rays.r_ang_right = angle;
-	vars->p.rays.x_co_left = vars->p.x_co
-		+ (cos(vars->p.rays.r_ang_left) * 0.5);
-	vars->p.rays.y_co_left = vars->p.y_co
-		+ (sin(vars->p.rays.r_ang_left) * 0.5);
-	vars->p.rays.x_co_right = vars->p.x_co
-		+ (cos(vars->p.rays.r_ang_right) * 0.5);
-	vars->p.rays.y_co_right = vars->p.y_co
-		+ (sin(vars->p.rays.r_ang_right) * 0.5);
-	draw_point(vars, vars->p.rays.x_co_left * 87,
-		vars->p.rays.y_co_left * 87);
-	draw_point(vars, vars->p.rays.x_co_right * 87,
-		vars->p.rays.y_co_right * 87);
+	count = 60;
+	while (count > 0)
+	{
+		x = vars->p.x_co;
+		y = vars->p.y_co;
+		wall = 0;
+		while (!wall)
+		{
+			x += (cos(angle) * 0.1);
+			y += (sin(angle) * 0.1);
+			wall = check_wall(vars, x, y);
+		}
+		draw_point(vars, x * 87.5, y * 87.5);
+		print_points(x, y);
+		print_points(vars->p.x_co, vars->p.y_co);
+		printf("Dist: %f\n", get_dist(vars->p.x_co, vars->p.y_co, x, y));
+		angle += (PI / 180);
+		count--;
+	}
+	// printf("X: %f, Y: %f\n", x, y);
 }
+	// vars->p.rays.r_ang_left = angle;
+	// angle = vars->p.ang + (PI / 6);
+	// if (angle > 2 * PI)
+	// 	angle -= 2 * PI;
+	// vars->p.rays.r_ang_right = angle;
+	// vars->p.rays.x_co_left = vars->p.x_co
+	// 	+ (cos(vars->p.rays.r_ang_left) * 0.5);
+	// vars->p.rays.y_co_left = vars->p.y_co
+	// 	+ (sin(vars->p.rays.r_ang_left) * 0.5);
+	// vars->p.rays.x_co_right = vars->p.x_co
+	// 	+ (cos(vars->p.rays.r_ang_right) * 0.5);
+	// vars->p.rays.y_co_right = vars->p.y_co
+	// 	+ (sin(vars->p.rays.r_ang_right) * 0.5);
+	// draw_point(vars, vars->p.rays.x_co_left * 87,
+	// 	vars->p.rays.y_co_left * 87);
+	// draw_point(vars, vars->p.rays.x_co_right * 87,
+	// 	vars->p.rays.y_co_right * 87);
 
 void	free_map(char **map)
 {
@@ -414,7 +471,7 @@ void	print_window(t_vars *vars)
 	int	i;
 
 	j = 0;
-	vars->img = mlx_xpm_file_to_image(vars->mlx, "xpm_files/red.xpm",
+	vars->img = mlx_xpm_file_to_image(vars->mlx, "xpm_files/wall.xpm",
 			&vars->width, &vars->height);
 	while (vars->map[j] != NULL)
 	{
@@ -469,12 +526,12 @@ int	key_hook(int keycode, t_vars *vars)
 	vars->img = mlx_new_image(vars->mlx, 700, 700);
 	mlx_put_image_to_window(vars->mlx, vars->win, vars->img, 0, 0);
 	mlx_destroy_image(vars->mlx, vars->img);
+	print_window(vars);
 	move_player(keycode, vars);
 	rotate_player(keycode, vars);
 	draw_point(vars, (vars->p.x_co * 87), (vars->p.y_co * 87));
 	handle_wall_collision(vars);
 	print_rays(vars);
-	print_window(vars);
 	ft_putstr_map(vars->map);
 	return (0);
 }

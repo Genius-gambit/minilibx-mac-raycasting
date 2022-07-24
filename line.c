@@ -51,7 +51,7 @@ void	make_line(t_vars *vars, float *x, float *y)
 	while (*y < 701)
 	{
 		draw_point(vars, *x, *y);
-		(*y) += 4;
+		(*y) += 5;
 	}
 }
 

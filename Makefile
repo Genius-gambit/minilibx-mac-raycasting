@@ -1,22 +1,37 @@
-NAME = exec
+NAME		=	cub3D
 
-SRCS = raycasting.c
+SRCS		=	raycasting.c
 
-OBJS = ${SRCS:.c=.o}
+MLX			=	libmlx.a
 
-CC = gcc -ggdb
+MLXDIR		=	./minilibx
 
-${NAME}: ${OBJS}
-		${MAKE} all -C ./minilibx/
-		cp ./minilibx/libmlx.a ./
-		$(CC) $(OBJS) libmlx.a -Lmlx_linux -L/usr/lib -Imlx_linux -lXext -lX11 -lm -lz -o $(NAME)
+MLXFLG		=	./libmlx.a -framework OpenGL -framework Appkit
 
-all: ${NAME}
+OBJS		=	${SRCS:.c=.o}
+
+CC			=	gcc -g3
+
+CFLAGS		=	-Wall -Werror -Wextra
+
+${NAME}:	${OBJS}
+			${MAKE} -C ${MLXDIR}
+			cp ${MLXDIR}/${MLX} ./
+			${CC} ${CFLAGS} ${OBJS} ${LIBFT} ${MLXFLG} -o ${NAME} -Ofast
+
+all:	${NAME}
+
+vg:		${NAME}
+		valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./cub3d file.cub
 
 clean:
 		rm -rf ${OBJS}
-		rm -rf ${NAME}
-		rm -rf libmlx.a
-		${MAKE} clean -C ./minilibx/
+		rm -rf ${MLX}
+		${MAKE} clean -C ${MLXDIR}
 
-re: clean all
+fclean:	clean
+		rm -rf ${NAME}
+
+re: fclean all
+
+.PHONY : all clean re fclean

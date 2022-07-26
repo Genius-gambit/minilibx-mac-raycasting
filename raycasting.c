@@ -28,15 +28,15 @@ typedef struct s_wall
 	int		wall_left;
 }				t_wall;
 
-typedef struct s_ray
+typedef struct s_rays
 {
-	float	r_ang_left;
-	float	r_ang_right;
-	float	x_co_left;
-	float	y_co_left;
-	float	x_co_right;
-	float	y_co_right;
-}				t_ray;
+	float	dist;
+	float	ang;
+	float	x;
+	float	y;
+	float	width;
+	float	height;
+}				t_rays;
 
 typedef struct s_player
 {
@@ -45,7 +45,6 @@ typedef struct s_player
 	float	ang;
 	float	dx;
 	float	dy;
-	t_ray	rays;
 	t_wall	wall;
 }				t_player;
 
@@ -60,6 +59,7 @@ typedef struct s_vars
 	int			height;
 	int			pause;
 	t_player	p;
+	t_rays		ray;
 }				t_vars;
 
 void	ft_putstr_map(char **map)
@@ -125,12 +125,6 @@ void	init(t_vars *vars)
 	vars->p.ang = 0;
 	vars->p.dx = 0;
 	vars->p.dy = 0;
-	vars->p.rays.r_ang_left = 0;
-	vars->p.rays.r_ang_right = 0;
-	vars->p.rays.x_co_left = 0;
-	vars->p.rays.x_co_right = 0;
-	vars->p.rays.y_co_left = 0;
-	vars->p.rays.y_co_right = 0;
 	vars->pause = 0;
 	vars->p.wall.wall_back = 0;
 	vars->p.wall.wall_front = 0;
@@ -327,23 +321,6 @@ void	print_rays(t_vars *vars)
 	}
 	// printf("X: %f, Y: %f\n", x, y);
 }
-	// vars->p.rays.r_ang_left = angle;
-	// angle = vars->p.ang + (PI / 6);
-	// if (angle > 2 * PI)
-	// 	angle -= 2 * PI;
-	// vars->p.rays.r_ang_right = angle;
-	// vars->p.rays.x_co_left = vars->p.x_co
-	// 	+ (cos(vars->p.rays.r_ang_left) * 0.5);
-	// vars->p.rays.y_co_left = vars->p.y_co
-	// 	+ (sin(vars->p.rays.r_ang_left) * 0.5);
-	// vars->p.rays.x_co_right = vars->p.x_co
-	// 	+ (cos(vars->p.rays.r_ang_right) * 0.5);
-	// vars->p.rays.y_co_right = vars->p.y_co
-	// 	+ (sin(vars->p.rays.r_ang_right) * 0.5);
-	// draw_point(vars, vars->p.rays.x_co_left * 87,
-	// 	vars->p.rays.y_co_left * 87);
-	// draw_point(vars, vars->p.rays.x_co_right * 87,
-	// 	vars->p.rays.y_co_right * 87);
 
 void	free_map(char **map)
 {
@@ -471,7 +448,7 @@ void	print_window(t_vars *vars)
 	int	i;
 
 	j = 0;
-	vars->img = mlx_xpm_file_to_image(vars->mlx, "wall.xpm",
+	vars->img = mlx_xpm_file_to_image(vars->mlx, "xpm_files/wall.xpm",
 			&vars->width, &vars->height);
 	while (vars->map[j] != NULL)
 	{

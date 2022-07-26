@@ -1,6 +1,6 @@
 NAME		=	cub3D
 
-SRCS		=	line.c
+SRCS		=	raycasting.c
 
 MLX			=	libmlx.a
 

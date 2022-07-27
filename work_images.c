@@ -307,6 +307,37 @@ void	print_points(float x, float y)
 	printf("X: %f, Y: %f\n", x, y);
 }
 
+void	draw_width(t_vars *vars, float x, float y)
+{
+	int	i;
+	int	j;
+
+	i = 5;
+	j = 5;
+	while (j > 0)
+	{
+		i = 20;
+		while (i > 0)
+		{
+			mlx_pixel_put(vars->mlx, vars->win, x + i, y + j, 0x00FF00);
+			i--;
+		}
+		j--;
+	}
+}
+
+void	make_line(t_vars *vars, float *x, float *y)
+{
+	*x = 350;
+	*y = 20;
+	draw_width(vars, *x, *y);
+	while (*y < 701)
+	{
+		draw_width(vars, *x, *y);
+		(*y) += 5;
+	}
+}
+
 void	print_rays(t_vars *vars)
 {
 	float	angle;
@@ -330,10 +361,17 @@ void	print_rays(t_vars *vars)
 			y += (sin(angle) * 0.1);
 			wall = check_wall(vars, x, y);
 		}
+		// vars->rays[60 - count].x = x;
+		// vars->rays[60 - count].y = y;
+		// vars->rays[60 - count].width = 5;
+		// vars->rays[60 - count].dist = get_dist(vars->p.x_co, vars->p.y_co, x, y);
+		// vars->rays[60 - count].ang = angle;
+		// vars->rays[60 - count].height = (8) / vars->rays[60 - count].dist;
 		// draw_point(vars, x * 155, y * 155);
 		// print_points(x, y);
 		// print_points(vars->p.x_co, vars->p.y_co);
-		// printf("Dist: %f\n", get_dist(vars->p.x_co, vars->p.y_co, x, y));
+		printf("Height: %f\n", vars->rays[60 - count].height);
+		break;
 		angle += (PI / 180);
 		count--;
 	}
@@ -569,8 +607,8 @@ void	print_player(t_vars *vars)
 	}
 	vars->p.x_co = i + 0.5;
 	vars->p.y_co = j + 0.5;
-	draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
-	handle_wall_collision(vars);
+	// draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
+	// handle_wall_collision(vars);
 }
 
 int	main(void)
@@ -582,8 +620,8 @@ int	main(void)
 	vars.mlx = mlx_init();
 	vars.win = mlx_new_window(vars.mlx, 1240, 1240, "Cub3D");
 	print_window(&vars);
-	// print_player(&vars);
-	// print_rays(&vars);
+	print_player(&vars);
+	print_rays(&vars);
 	mlx_hook(vars.win, 2, (1L << 0), key_hook, &vars);
 	// mlx_hook(vars.win, 6, (1L << 6), mouse_hook, &vars);
 	mlx_loop(vars.mlx);

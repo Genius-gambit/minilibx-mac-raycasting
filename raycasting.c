@@ -289,6 +289,39 @@ void	print_points(float x, float y)
 	printf("X: %f, Y: %f\n", x, y);
 }
 
+void	make_line(t_vars *vars, float x, float y)
+{
+	double	m;
+	float	x1;
+	float	x2;
+	float	y1;
+	float	y2;
+	double	incpt;
+
+	x1 = vars->p.x_co * 155;
+	y1 = vars->p.y_co * 155;
+	x2 = x;
+	y2 = y;
+	m = (y2 - y1) / (x2 - x1);
+	incpt = y1 - (m * x1);
+	if (x1 < x2)
+	{
+		while(x1 <= x2)
+		{
+			draw_point(vars, x1, (m * x1) + incpt);
+			x1++;
+		}
+	}
+	else
+	{
+		while (x1 >= x2)
+		{
+			draw_point(vars, x1, (m * x1) + incpt);
+			x1--;
+		}
+	}
+}
+
 void	print_rays(t_vars *vars)
 {
 	float	angle;
@@ -312,10 +345,11 @@ void	print_rays(t_vars *vars)
 			y += (sin(angle) * 0.1);
 			wall = check_wall(vars, x, y);
 		}
-		draw_point(vars, x * 155, y * 155);
+		// draw_point(vars, x * 155, y * 155);
+		make_line(vars, x * 155, y * 155);
 		// print_points(x, y);
 		// print_points(vars->p.x_co, vars->p.y_co);
-		// printf("Dist: %f\n", get_dist(vars->p.x_co, vars->p.y_co, x, y));
+		printf("Dist: %f\n", get_dist(vars->p.x_co, vars->p.y_co, x, y) * 32);
 		angle += (PI / 180);
 		count--;
 	}

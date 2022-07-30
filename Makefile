@@ -1,6 +1,6 @@
 NAME		=	cub3D
 
-SRCS		=	work_images.c
+SRCS		=	game.c
 
 MLX			=	libmlx.a
 
@@ -12,7 +12,7 @@ OBJS		=	${SRCS:.c=.o}
 
 CC			=	gcc -g3
 
-CFLAGS		=	-Wall -Werror -Wextra
+CFLAGS		=	
 
 ${NAME}:	${OBJS}
 			${MAKE} -C ${MLXDIR}

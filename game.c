@@ -12,7 +12,8 @@
 #define ARROW_L 123
 #define ARROW_R 124
 #define ESC 53
-#define PI 3.14159265358979323846
+#define PI 3.141592653589793238
+#define BLOCK_SIZE 32
 
 typedef struct s_wall
 {
@@ -59,7 +60,7 @@ typedef struct s_vars
 	int			height;
 	int			pause;
 	t_player	p;
-	t_rays		ray;
+	t_rays		ray[60];
 }				t_vars;
 
 void	ft_putstr_map(char **map)
@@ -99,12 +100,12 @@ char	**get_map2d(void)
 	char	**map;
 
 	map = malloc(sizeof(char *) * 9);
-	map[0] = strdup("111");
+	map[0] = strdup("11111111");
 	map[1] = strdup("10000001");
 	map[2] = strdup("10000001");
-	map[3] = strdup("10000001");
-	map[4] = strdup("1001P101");
-	map[5] = strdup("10001001");
+	map[3] = strdup("10001001");
+	map[4] = strdup("1001P001");
+	map[5] = strdup("10000001");
 	map[6] = strdup("10000001");
 	map[7] = strdup("11111111");
 	map[8] = NULL;
@@ -159,7 +160,7 @@ void	wall_coll_forwrd(t_vars *vars)
 			|| (vars->map[vars->p.wall.col][vars->p.wall.row]
 			&& vars->map[vars->p.wall.col][vars->p.wall.row] == '1'))
 			vars->p.wall.wall_front = 1;
-		draw_point(vars, vars->p.wall.x * 155, vars->p.wall.y * 155);
+		draw_point(vars, vars->p.wall.x * 87, vars->p.wall.y * 87);
 		vars->p.wall.angle += (10 * PI / 180);
 		if (vars->p.wall.angle > 2 * PI)
 			vars->p.wall.angle -= 2 * PI;
@@ -182,7 +183,7 @@ void	wall_coll_bckwrd(t_vars *vars)
 			|| (vars->map[vars->p.wall.col][vars->p.wall.row]
 			&& vars->map[vars->p.wall.col][vars->p.wall.row] == '1'))
 			vars->p.wall.wall_back = 1;
-		draw_point(vars, vars->p.wall.x * 155, vars->p.wall.y * 155);
+		draw_point(vars, vars->p.wall.x * 87, vars->p.wall.y * 87);
 		vars->p.wall.angle += (10 * PI / 180);
 		if (vars->p.wall.angle > 2 * PI)
 			vars->p.wall.angle -= 2 * PI;
@@ -210,7 +211,7 @@ void	wall_coll_left(t_vars *vars)
 			|| (vars->map[vars->p.wall.col][vars->p.wall.row]
 			&& vars->map[vars->p.wall.col][vars->p.wall.row] == '1'))
 			vars->p.wall.wall_left = 1;
-		draw_point(vars, vars->p.wall.x * 155, vars->p.wall.y * 155);
+		draw_point(vars, vars->p.wall.x * 87, vars->p.wall.y * 87);
 		vars->p.wall.angle += (10 * PI / 180);
 		if (vars->p.wall.angle > 2 * PI)
 			vars->p.wall.angle -= 2 * PI;
@@ -238,7 +239,7 @@ void	wall_coll_right(t_vars *vars)
 			|| (vars->map[vars->p.wall.col][vars->p.wall.row]
 			&& vars->map[vars->p.wall.col][vars->p.wall.row] == '1'))
 			vars->p.wall.wall_right = 1;
-		draw_point(vars, vars->p.wall.x * 155, vars->p.wall.y * 155);
+		draw_point(vars, vars->p.wall.x * 87, vars->p.wall.y * 87);
 		vars->p.wall.angle += (10 * PI / 180);
 		if (vars->p.wall.angle > 2 * PI)
 			vars->p.wall.angle -= 2 * PI;
@@ -298,8 +299,8 @@ void	make_line(t_vars *vars, float x, float y)
 	float	y2;
 	double	incpt;
 
-	x1 = vars->p.x_co * 155;
-	y1 = vars->p.y_co * 155;
+	x1 = vars->p.x_co * 87.5;
+	y1 = vars->p.y_co * 87.5;
 	x2 = x;
 	y2 = y;
 	m = (y2 - y1) / (x2 - x1);
@@ -322,18 +323,93 @@ void	make_line(t_vars *vars, float x, float y)
 	}
 }
 
+void	make_line_vertical(t_vars *vars, float x, float y)
+{
+	double	m;
+	float	x1;
+	float	x2;
+	float	y1;
+	float	y2;
+	double	incpt;
+
+	x1 = vars->p.x_co * 87.5;
+	y1 = vars->p.y_co * 87.5;
+	x2 = x;
+	y2 = y;
+	m = (y2 - y1) / (x2 - x1);
+	printf("Slope: %f\n", m);
+	incpt = y1 - (m * x1);
+	if (y1 < y2)
+	{
+		while(y1 <= y2)
+		{
+			draw_point(vars, (y1 - incpt) / m, x1);
+			y1++;
+		}
+	}
+	else
+	{
+		while (y1 >= y2)
+		{
+			draw_point(vars, (y1 - incpt) / m, x1);
+			y1--;
+		}
+	}
+}
+
+void	draw_width(t_vars *vars, float x, float y)
+{
+	int	i;
+	int	j;
+
+	i = 5;
+	j = 5;
+	while (j > 0)
+	{
+		i = 20;
+		while (i >= 0)
+		{
+			mlx_pixel_put(vars->mlx, vars->win, x + i, y + j, 0x440000);
+			i--;
+		}
+		j--;
+	}
+}
+
+void	make_wall(t_vars *vars, float *x, float *y)
+{
+	int	count;
+	static int	index;
+
+	if (index == 60)
+		index = 0;
+	count = vars->ray[index].height;
+	draw_width(vars, *x, *y);
+	while (count > 0)
+	{
+		draw_width(vars, *x, *y);
+		(*y) += 1;
+		count--;
+	}
+	index++;
+}
+
 void	print_rays(t_vars *vars)
 {
 	float	angle;
 	float	x;
 	float	y;
+	float	old_x;
+	float	old_y;
 	int		wall;
 	int		count;
+	float	x1;
 
 	angle = vars->p.ang - (PI / 6);
 	if (angle < 0)
 		angle += 2 * PI;
 	count = 60;
+	x1 = 700;
 	while (count > 0)
 	{
 		x = vars->p.x_co;
@@ -341,20 +417,53 @@ void	print_rays(t_vars *vars)
 		wall = 0;
 		while (!wall)
 		{
-			x += (cos(angle) * 0.1);
-			y += (sin(angle) * 0.1);
+			old_x = x;
+			old_y = y;
+			x += (cos(angle) * 0.0001);
+			y += (sin(angle) * 0.0001);
 			wall = check_wall(vars, x, y);
 		}
-		// draw_point(vars, x * 155, y * 155);
-		make_line(vars, x * 155, y * 155);
+		vars->ray[60 - count].x = x;
+		vars->ray[60 - count].y = y;
+		vars->ray[60 - count].dist = get_dist(vars->p.x_co, vars->p.y_co, x, y);
+		vars->ray[60 - count].height = (BLOCK_SIZE * 700) / (vars->ray[60 - count].dist * 87.5);
+		draw_point(vars, x * 87.5, y * 87.5);
+		if (angle >= 85 * (PI / 180) && angle <= 95 * (PI / 180))
+			make_line_vertical(vars, x * 87.5, y * 87.5);
+		// else if ((angle >= 240 * (PI / 180)) && (angle <= 300 * (PI / 180)))
+		// 	make_line_vertical(vars, x * 87.5, y * 87.5);
+		// else
+			make_line(vars, x * 87.5, y * 87.5);
+		y = 350 - (vars->ray[60 - count].height / 2);
+		make_wall(vars, &x1, &y);
+		// break;
+		// break;
 		// print_points(x, y);
 		// print_points(vars->p.x_co, vars->p.y_co);
-		printf("Dist: %f\n", get_dist(vars->p.x_co, vars->p.y_co, x, y) * 32);
+		// printf("Dist: %f\n", get_dist(vars->p.x_co, vars->p.y_co, x, y) * 32);
 		angle += (PI / 180);
+		x1 += 11.6;
 		count--;
 	}
 	// printf("X: %f, Y: %f\n", x, y);
 }
+	// vars->p.rays.r_ang_left = angle;
+	// angle = vars->p.ang + (PI / 6);
+	// if (angle > 2 * PI)
+	// 	angle -= 2 * PI;
+	// vars->p.rays.r_ang_right = angle;
+	// vars->p.rays.x_co_left = vars->p.x_co
+	// 	+ (cos(vars->p.rays.r_ang_left) * 0.5);
+	// vars->p.rays.y_co_left = vars->p.y_co
+	// 	+ (sin(vars->p.rays.r_ang_left) * 0.5);
+	// vars->p.rays.x_co_right = vars->p.x_co
+	// 	+ (cos(vars->p.rays.r_ang_right) * 0.5);
+	// vars->p.rays.y_co_right = vars->p.y_co
+	// 	+ (sin(vars->p.rays.r_ang_right) * 0.5);
+	// draw_point(vars, vars->p.rays.x_co_left * 87,
+	// 	vars->p.rays.y_co_left * 87);
+	// draw_point(vars, vars->p.rays.x_co_right * 87,
+	// 	vars->p.rays.y_co_right * 87);
 
 void	free_map(char **map)
 {
@@ -391,7 +500,7 @@ void	move_frwrd(t_vars *vars)
 		col = vars->p.y_co + vars->p.dy;
 		if (vars->map[col][row] == '1' || vars->p.wall.wall_front)
 		{
-			draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
+			draw_point(vars, (vars->p.x_co * 87), (vars->p.y_co * 87));
 			return ;
 		}
 		vars->map[(int)vars->p.y_co][(int)vars->p.x_co] = '0';
@@ -416,7 +525,7 @@ void	move_right(t_vars *vars)
 		col = vars->p.y_co + vars->p.dy;
 		if (vars->map[col][row] == '1' || vars->p.wall.wall_right)
 		{
-			draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
+			draw_point(vars, (vars->p.x_co * 87), (vars->p.y_co * 87));
 			return ;
 		}
 		vars->map[(int)vars->p.y_co][(int)vars->p.x_co] = '0';
@@ -441,7 +550,7 @@ void	move_bckwrd(t_vars *vars)
 		col = vars->p.y_co - vars->p.dy;
 		if (vars->map[col][row] == '1' || vars->p.wall.wall_back)
 		{
-			draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
+			draw_point(vars, (vars->p.x_co * 87), (vars->p.y_co * 87));
 			return ;
 		}
 		vars->map[(int)vars->p.y_co][(int)vars->p.x_co] = '0';
@@ -466,13 +575,35 @@ void	move_left(t_vars *vars)
 		col = vars->p.y_co - vars->p.dy;
 		if (vars->map[col][row] == '1' || vars->p.wall.wall_left)
 		{
-			draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
+			draw_point(vars, (vars->p.x_co * 87), (vars->p.y_co * 87));
 			return ;
 		}
 		vars->map[(int)vars->p.y_co][(int)vars->p.x_co] = '0';
 		vars->p.x_co -= vars->p.dx;
 		vars->p.y_co -= vars->p.dy;
 		vars->map[col][row] = 'P';
+	}
+}
+
+void	print_image(t_vars *vars)
+{
+	int	j;
+	int	i;
+	int	col;
+
+	j = 0;
+	col = 0x00AAFF;
+	while (j < 700)
+	{
+		i = 700;
+		if (j == 350)
+			col = 0x211100;
+		while (i < 1400)
+		{
+			mlx_pixel_put(vars->mlx, vars->win, i, j, col);
+			i++;
+		}
+		j++;
 	}
 }
 
@@ -491,12 +622,13 @@ void	print_window(t_vars *vars)
 		{
 			if (vars->map[j][i] == '1')
 				mlx_put_image_to_window(vars->mlx, vars->win,
-					vars->img, i * 155, j * 155);
+					vars->img, i * 87, j * 87);
 			i++;
 		}
 		j++;
 	}
 	mlx_destroy_image(vars->mlx, vars->img);
+	print_image(vars);
 }
 
 void	move_player(int keycode, t_vars *vars)
@@ -534,13 +666,13 @@ void	rotate_player(int keycode, t_vars *vars)
 
 int	key_hook(int keycode, t_vars *vars)
 {
-	vars->img = mlx_new_image(vars->mlx, 1240, 1240);
+	vars->img = mlx_new_image(vars->mlx, 700, 700);
 	mlx_put_image_to_window(vars->mlx, vars->win, vars->img, 0, 0);
 	mlx_destroy_image(vars->mlx, vars->img);
 	print_window(vars);
 	move_player(keycode, vars);
 	rotate_player(keycode, vars);
-	draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
+	draw_point(vars, (vars->p.x_co * 87), (vars->p.y_co * 87));
 	handle_wall_collision(vars);
 	print_rays(vars);
 	ft_putstr_map(vars->map);
@@ -570,7 +702,7 @@ void	print_player(t_vars *vars)
 	int	i;
 
 	j = 0;
-	vars->p.ang = 0 * (PI / 180);
+	vars->p.ang = 270 * (PI / 180);
 	while (vars->map[j] != NULL)
 	{
 		i = 0;
@@ -586,7 +718,7 @@ void	print_player(t_vars *vars)
 	}
 	vars->p.x_co = i + 0.5;
 	vars->p.y_co = j + 0.5;
-	draw_point(vars, (vars->p.x_co * 155), (vars->p.y_co * 155));
+	draw_point(vars, (vars->p.x_co * 87), (vars->p.y_co * 87));
 	handle_wall_collision(vars);
 }
 
@@ -597,7 +729,7 @@ int	main(void)
 	init(&vars);
 	vars.map = get_map2d();
 	vars.mlx = mlx_init();
-	vars.win = mlx_new_window(vars.mlx, 1240, 1240, "Cub3D");
+	vars.win = mlx_new_window(vars.mlx, 1400, 700, "Cub3D");
 	print_window(&vars);
 	print_player(&vars);
 	print_rays(&vars);
